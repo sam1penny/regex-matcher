@@ -1,6 +1,11 @@
 module Regex : sig
 
-    type regex
+    type regex = EmptySet
+                |EmptyString
+                |Character of char
+                |Union of regex * regex
+                |Concat of regex * regex
+                |Star of regex
 
     val union : regex -> regex -> regex 
     val concat : regex -> regex -> regex
@@ -20,8 +25,6 @@ end = struct
 
     let union r1 r2 =
         match r1, r2 with
-            EmptyString, _ -> r1
-            |_, EmptyString -> r2
             |EmptySet, _ -> r2
             |_, EmptySet -> r1
             |_, _ -> Union(r1, r2)
@@ -64,9 +67,19 @@ end = struct
         evaluate (List.fold_left derive r clist)
 end
 
-let r = Union (Character('c'), Concat(Character('a'), Star(Character('b'))))
+let r = Regex.Union (Regex.Character('c'), Regex.Concat(Regex.Character('a'), Regex.Star(Regex.Character('b'))))
 
-let z = regexmatch "a" r
-let a = regexmatch "ab" r
-let b = regexmatch "abb" r
-let c = regexmatch "abbcb" r
+let z = Regex.regexmatch "a" r
+let a = Regex.regexmatch "ab" r
+let b = Regex.regexmatch "abb" r
+let c = Regex.regexmatch "abbcb" r
+
+let timing_regex = Regex.Concat(Regex.Concat(Regex.Character('a'), Regex.Star(Regex.Union(Regex.Character('b'), Regex.Character('c')))), Regex.Character('c'))
+let time s r =
+    let t = Sys.time() in
+    let result = Regex.regexmatch s r in
+    Printf.printf "Execution time: %fs\n" (Sys.time() -. t);
+    result
+
+let ts = "abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbc"
+let y = time ts timing_regex
