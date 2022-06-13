@@ -63,8 +63,9 @@ end = struct
       exp (String.length s - 1) []
 
     let regexmatch s r =
-        let clist = explode s in
-        evaluate (List.fold_left derive r clist)
+        explode s
+        |> List.fold_left derive r
+        |> evaluate
 end
 
 let r = Regex.Union (Regex.Character('c'), Regex.Concat(Regex.Character('a'), Regex.Star(Regex.Character('b'))))
@@ -81,5 +82,5 @@ let time s r =
     Printf.printf "Execution time: %fs\n" (Sys.time() -. t);
     result
 
-let ts = "abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbc"
+let ts = "abbbbbbbbbbbcccccccbbbcbbbbbbbbc"
 let y = time ts timing_regex
